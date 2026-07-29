@@ -1,0 +1,79 @@
+name: Verify female-portrait-director import
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/verify-female-portrait-director-import.yml
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out ai-skills
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Clone source repository
+        run: |
+          rm -rf /tmp/female-portrait-director
+          git clone --depth 1 https://github.com/aoeking21/female-portrait-director.git /tmp/female-portrait-director
+
+      - name: Reconcile target with source
+        run: |
+          mkdir -p image-generation/female-portrait-director
+          rsync -a --delete --exclude='.git' /tmp/female-portrait-director/ image-generation/female-portrait-director/
+
+      - name: Generate verification report
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE=/tmp/female-portrait-director
+          TARGET=image-generation/female-portrait-director
+
+          (cd "$SOURCE" && find . -type f ! -path './.git/*' -printf '%P\n' | LC_ALL=C sort) > /tmp/source-files.txt
+          (cd "$TARGET" && find . -type f -printf '%P\n' | LC_ALL=C sort) > /tmp/target-files.txt
+
+          diff -u /tmp/source-files.txt /tmp/target-files.txt
+
+          SOURCE_COUNT=$(wc -l < /tmp/source-files.txt | tr -d ' ')
+          TARGET_COUNT=$(wc -l < /tmp/target-files.txt | tr -d ' ')
+
+          SOURCE_HASH=$(cd "$SOURCE" && while IFS= read -r f; do sha256sum "$f"; done < /tmp/source-files.txt | LC_ALL=C sort | sha256sum | awk '{print $1}')
+          TARGET_HASH=$(cd "$TARGET" && while IFS= read -r f; do sha256sum "$f"; done < /tmp/target-files.txt | LC_ALL=C sort | sha256sum | awk '{print $1}')
+
+          test "$SOURCE_COUNT" = "$TARGET_COUNT"
+          test "$SOURCE_HASH" = "$TARGET_HASH"
+
+          cp /tmp/target-files.txt docs/female-portrait-director-manifest.txt
+
+          cat > docs/female-portrait-director-import-report.md <<EOF
+          # female-portrait-director 导入校验报告
+
+          - 源仓库：\`aoeking21/female-portrait-director\`
+          - 目标目录：\`image-generation/female-portrait-director/\`
+          - 源文件数量：\`$SOURCE_COUNT\`
+          - 目标文件数量：\`$TARGET_COUNT\`
+          - 源目录内容哈希：\`$SOURCE_HASH\`
+          - 目标目录内容哈希：\`$TARGET_HASH\`
+          - 校验结果：**完整一致**
+
+          校验方式：比较完整文件清单，并对所有文件的 SHA-256 结果进行排序后计算目录级哈希。\`.git\` 元数据不纳入比较。
+          EOF
+
+      - name: Commit verification results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add image-generation/female-portrait-director docs/female-portrait-director-manifest.txt docs/female-portrait-director-import-report.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Verify complete female-portrait-director import"
+          git push origin main
