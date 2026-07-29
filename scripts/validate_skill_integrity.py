@@ -276,7 +276,10 @@ def validate_routes(skill_root: Path, result: ValidationResult) -> None:
             continue
 
         route_text = file_path.read_text(encoding="utf-8")
-        id_match = ROUTE_ID_RE.search(route_text)
+        # Some imported Markdown files escape underscores in field names as
+        # ``route\_id``. Normalize that presentation-only escape before parsing.
+        normalized_route_text = route_text.replace(r"\_", "_")
+        id_match = ROUTE_ID_RE.search(normalized_route_text)
         if not id_match:
             result.findings.append(
                 Finding(
@@ -292,7 +295,7 @@ def validate_routes(skill_root: Path, result: ValidationResult) -> None:
                 Finding(
                     "route-registry",
                     file_path,
-                    line_number(route_text, id_match.start()),
+                    line_number(normalized_route_text, id_match.start()),
                     route_id,
                     f"route_id mismatch: file declares '{id_match.group('route_id')}'",
                 )
@@ -314,6 +317,10 @@ def resolve_skill_reference(skill_root: Path, source: Path, raw_path: str) -> Pa
     cleaned = unquote(raw_path).replace("\\", "/")
     if cleaned.startswith("skill/"):
         return (skill_root / cleaned).resolve(strict=False)
+    if cleaned.startswith(("./", "../")):
+        return (source.parent / cleaned).resolve(strict=False)
+    if cleaned.split("/", 1)[0] in {"core", "references", "routes", "tools", "overlays"}:
+        return (skill_root / "skill" / cleaned).resolve(strict=False)
     return (source.parent / cleaned).resolve(strict=False)
 
 
