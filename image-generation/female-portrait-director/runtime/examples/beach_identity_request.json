@@ -1,0 +1,20 @@
+{
+  "task": "海边日系明艳生活方式摄影",
+  "requirements": [
+    "9:16",
+    "完整全身",
+    "肤色镂空优雅泳装",
+    "动态抓拍",
+    "真实摄影",
+    "人物身份锁定"
+  ],
+  "aspect_ratio": "9:16",
+  "identity_reference": "reference.jpg",
+  "identity_authorized": true,
+  "output_dir": "outputs",
+  "output_name": "beach-identity",
+  "extra_negative": [
+    "持续凝视镜头",
+    "刻意摆拍"
+  ]
+}

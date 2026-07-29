@@ -1,0 +1,54 @@
+name: Test female portrait runtime
+
+on:
+  pull_request:
+    paths:
+      - "image-generation/female-portrait-director/runtime/**"
+      - ".github/workflows/test-female-portrait-runtime.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "image-generation/female-portrait-director/runtime/**"
+      - ".github/workflows/test-female-portrait-runtime.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONPATH: image-generation/female-portrait-director/runtime/src
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile runtime
+        run: python -m compileall -q image-generation/female-portrait-director/runtime/src
+
+      - name: Run dependency-free tests
+        run: >-
+          python -m unittest discover
+          -s image-generation/female-portrait-director/runtime/tests
+          -v
+
+      - name: Write summary
+        if: always()
+        run: |
+          {
+            echo "## female-portrait-director runtime"
+            echo ""
+            echo "- prompt builder: tested"
+            echo "- identity-lock contract validator: tested"
+            echo "- dry-run adapter: tested"
+            echo "- generation manifest pipeline: tested"
+            echo "- external image API: intentionally not called in CI"
+          } >> "$GITHUB_STEP_SUMMARY"

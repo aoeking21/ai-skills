@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "female-portrait-director-runtime"
+version = "0.1.0"
+description = "Executable prompt, identity-lock, image-adapter, and generation pipeline for female-portrait-director"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+openai = ["openai>=1.0"]
+
+[project.scripts]
+fpd-runtime = "female_portrait_director_runtime.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
