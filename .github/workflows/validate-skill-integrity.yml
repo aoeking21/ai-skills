@@ -1,0 +1,56 @@
+name: Validate skill integrity
+
+on:
+  pull_request:
+    paths:
+      - "**/*.md"
+      - "image-generation/female-portrait-director/**"
+      - "scripts/validate_skill_integrity.py"
+      - ".github/workflows/validate-skill-integrity.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "**/*.md"
+      - "image-generation/female-portrait-director/**"
+      - "scripts/validate_skill_integrity.py"
+      - ".github/workflows/validate-skill-integrity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Markdown, routes and dependency closure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run integrity validator
+        id: validate
+        shell: bash
+        run: |
+          set +e
+          python scripts/validate_skill_integrity.py \
+            --repo-root . \
+            --skill-root image-generation/female-portrait-director \
+            --report /tmp/skill-integrity-report.md
+          status=$?
+          cat /tmp/skill-integrity-report.md >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
+
+      - name: Upload validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: skill-integrity-report
+          path: /tmp/skill-integrity-report.md
+          if-no-files-found: error
