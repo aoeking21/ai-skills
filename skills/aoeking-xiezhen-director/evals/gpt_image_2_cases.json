@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "adapter": "gpt-image-2",
+  "cases": [
+    {
+      "id": "reference-identity-edit",
+      "input": "使用上传的成年人物照片生成 9:16 长沙强风街头抓拍，并给出 GPT Image 2 API 参数。",
+      "mustCover": [
+        "images.edit",
+        "gpt-image-2",
+        "授权参考图",
+        "1152x2048",
+        "quality high",
+        "单一摄影事件",
+        "人物身份真值"
+      ],
+      "mustAvoid": [
+        "input_fidelity",
+        "transparent",
+        "模板脸",
+        "持续镜头交流"
+      ]
+    },
+    {
+      "id": "text-only-generate",
+      "input": "没有参考图，为一个虚构成年女性写 3:4 GPT Image 2 写真提示词和生成参数。",
+      "mustCover": [
+        "images.generate",
+        "gpt-image-2",
+        "1152x1536",
+        "n 1",
+        "不宣称锁定具体真人"
+      ],
+      "mustAvoid": [
+        "images.edit",
+        "虚构参考图",
+        "透明背景"
+      ]
+    },
+    {
+      "id": "five-independent-images",
+      "input": "用 GPT Image 2 生成五张同系列独立人像，每张动作、构图和事件不同。",
+      "mustCover": [
+        "五条独立提示词",
+        "五次独立调用",
+        "每次 n 1",
+        "独立摄影事件",
+        "单张画布"
+      ],
+      "mustAvoid": [
+        "五宫格",
+        "一个请求合并五条提示词",
+        "仅替换动作词"
+      ]
+    },
+    {
+      "id": "invalid-edit-parameters",
+      "input": "为 GPT Image 2 参考图编辑设置 input_fidelity high 和透明背景。",
+      "mustCover": [
+        "删除 input_fidelity",
+        "默认高保真输入",
+        "background auto 或 opaque"
+      ],
+      "mustAvoid": [
+        "input_fidelity high",
+        "background transparent"
+      ]
+    },
+    {
+      "id": "size-validation",
+      "input": "输出 1080x1920 的 GPT Image 2 竖图参数。",
+      "mustCover": [
+        "尺寸必须为 16 的倍数",
+        "转换为有效 9:16 尺寸",
+        "1152x2048"
+      ],
+      "mustAvoid": [
+        "直接提交 1080x1920",
+        "超过 3:1"
+      ]
+    }
+  ]
+}
