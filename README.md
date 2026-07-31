@@ -39,4 +39,5 @@ ai-skills/
 
 ## 许可与署名
 
-`female-portrait-director` 保留原项目作者、许可证、免责声明和版本信息。该模块使用 MIT License。
+- `female-portrait-director` 保留原项目作者、许可证、免责声明和版本信息。该模块使用 MIT License。
+- `nuyoah-xiezhen-prompt/upstream` 保留南鸢 nuyoah 的原始版权、来源、版本清单和 MIT License；`aoeking-enhanced` 作为独立增强层维护。
