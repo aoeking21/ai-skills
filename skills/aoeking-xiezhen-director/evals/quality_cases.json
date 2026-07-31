@@ -24,6 +24,18 @@
       "input": "直闪近景，保留水润唇和真实皮肤。",
       "mustCover": ["皮肤微纹理", "区域反射", "T 区窄高光", "双颊柔和漫反射"],
       "mustAvoid": ["全脸油膜", "用毛孔替代反射控制"]
+    },
+    {
+      "id": "gpt-image-2-reference-route",
+      "input": "基于上传的成年人物照片，用 GPT Image 2 生成 9:16 写真并输出 API 参数。",
+      "mustCover": ["edit 路由", "gpt-image-2", "1152x2048", "quality high", "output_format png", "n 1"],
+      "mustAvoid": ["input_fidelity", "transparent", "generate 路由替代参考图编辑"]
+    },
+    {
+      "id": "gpt-image-2-size-and-batch",
+      "input": "生成五张 1080x1920 的 GPT Image 2 独立人像。",
+      "mustCover": ["转换为有效 9:16 尺寸", "1152x2048", "五次独立调用", "每次 n 1"],
+      "mustAvoid": ["直接提交 1080x1920", "一个请求合并五条提示词", "五宫格"]
     }
   ]
 }

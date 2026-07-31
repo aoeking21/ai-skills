@@ -1,4 +1,4 @@
 interface:
   display_name: "Aoeking 写真导演"
-  short_description: "锁定成年人物身份与体态，用真实摄影事件生成和整改写真提示词"
-  default_prompt: "使用 $aoeking-xiezhen-director，以上传照片中的成年人为唯一身份参考，按人物 DNA、摄影事件和真实物理生成可直接提交图像模型的完整中文提示词。"
+  short_description: "锁定成年人物身份与体态，并为 GPT Image 2 编译真实摄影提示词和调用参数"
+  default_prompt: "使用 $aoeking-xiezhen-director。以上传照片中的授权成年人为唯一身份参考，按人物 DNA、摄影事件和真实物理生成完整中文提示词；当我指定 GPT Image 2 时，读取专用 Adapter，选择 generate 或 edit 路由，并输出有效尺寸与参数包。"
