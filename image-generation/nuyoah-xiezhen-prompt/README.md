@@ -17,3 +17,15 @@
 - 锁定提交：`bc1edb21655e36b89599d31b16f23ad5193d483f`
 - 上游版本：`0.1.0`
 - 许可：MIT
+
+<!-- canonical-skill:start -->
+
+## 可安装标准 Skill
+
+完全自包含的正式入口位于 [`skills/aoeking-xiezhen-director`](../../skills/aoeking-xiezhen-director/README.md)。该目录可以被 Agent Skills 客户端独立发现、安装和更新，不依赖本模块的相对路径。
+
+```bash
+npx skills add aoeking21/ai-skills --skill aoeking-xiezhen-director -g -a codex -y
+```
+
+<!-- canonical-skill:end -->
