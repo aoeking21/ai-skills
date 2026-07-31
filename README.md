@@ -13,16 +13,31 @@
 - [独立仓库](https://github.com/aoeking21/female-portrait-director)
 - 上游来源：[liyue-aigc/female-portrait-director](https://github.com/liyue-aigc/female-portrait-director)
 
+<!-- nuyoah-xiezhen-prompt:start -->
+
+### nuyoah-xiezhen-prompt
+
+南鸢写真提示词 Skill 的锁定上游镜像，以及面向长期人物项目的 aoeking 增强层。
+
+- [模块入口](image-generation/nuyoah-xiezhen-prompt/README.md)
+- [上游原版](image-generation/nuyoah-xiezhen-prompt/upstream/SKILL.md)
+- [aoeking 增强版](image-generation/nuyoah-xiezhen-prompt/aoeking-enhanced/SKILL.md)
+- 上游来源：[nuyoah-ai-works/nuyoah-xiezhen-prompt](https://github.com/nuyoah-ai-works/nuyoah-xiezhen-prompt)
+
+<!-- nuyoah-xiezhen-prompt:end -->
+
 ## 目录结构
 
 ```text
 ai-skills/
 ├── image-generation/
-│   └── female-portrait-director/
+│   ├── female-portrait-director/
+│   └── nuyoah-xiezhen-prompt/
 ├── prompt-engineering/
 └── docs/
 ```
 
 ## 许可与署名
 
-`female-portrait-director` 保留原项目作者、许可证、免责声明和版本信息。该模块使用 MIT License。
+- `female-portrait-director` 保留原项目作者、许可证、免责声明和版本信息。该模块使用 MIT License。
+- `nuyoah-xiezhen-prompt/upstream` 保留南鸢 nuyoah 的原始版权、来源、版本清单和 MIT License；`aoeking-enhanced` 作为独立增强层维护。
