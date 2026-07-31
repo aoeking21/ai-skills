@@ -1,0 +1,341 @@
+name: Import Nuyoah Xiezhen Prompt
+
+on:
+  push:
+    branches:
+      - agent/import-nuyoah-xiezhen-prompt
+    paths:
+      - .github/workflows/import-nuyoah-xiezhen-prompt.yml
+
+permissions:
+  contents: write
+
+jobs:
+  import-skill:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out import branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/import-nuyoah-xiezhen-prompt
+          fetch-depth: 0
+
+      - name: Mirror pinned upstream release
+        shell: bash
+        run: |
+          set -euo pipefail
+          UPSTREAM_REPO="https://github.com/nuyoah-ai-works/nuyoah-xiezhen-prompt.git"
+          UPSTREAM_COMMIT="bc1edb21655e36b89599d31b16f23ad5193d483f"
+          ROOT="image-generation/nuyoah-xiezhen-prompt"
+          DEST="$ROOT/upstream"
+
+          rm -rf /tmp/nuyoah-xiezhen-prompt "$ROOT"
+          git clone --quiet "$UPSTREAM_REPO" /tmp/nuyoah-xiezhen-prompt
+          git -C /tmp/nuyoah-xiezhen-prompt checkout --quiet "$UPSTREAM_COMMIT"
+          test "$(git -C /tmp/nuyoah-xiezhen-prompt rev-parse HEAD)" = "$UPSTREAM_COMMIT"
+
+          mkdir -p "$DEST"
+          cp -a /tmp/nuyoah-xiezhen-prompt/. "$DEST"/
+          rm -rf "$DEST/.git"
+          find "$DEST" -name .DS_Store -delete
+          printf '%s\n' "$UPSTREAM_COMMIT" > "$ROOT/UPSTREAM_COMMIT"
+
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          root = Path("image-generation/nuyoah-xiezhen-prompt/upstream")
+          manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+          failures = []
+          for item in manifest["files"]:
+              path = root / item["path"]
+              if not path.is_file():
+                  failures.append(f"missing: {item['path']}")
+                  continue
+              digest = hashlib.sha256(path.read_bytes()).hexdigest()
+              if digest != item["sha256"]:
+                  failures.append(f"sha256 mismatch: {item['path']}")
+          if failures:
+              raise SystemExit("\n".join(failures))
+          print(f"Verified {len(manifest['files'])} upstream files")
+          PY
+
+      - name: Add aoeking enhanced layer
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="image-generation/nuyoah-xiezhen-prompt"
+          ENHANCED="$ROOT/aoeking-enhanced"
+          mkdir -p "$ENHANCED/references"
+
+          cat > "$ROOT/README.md" <<'EOF'
+          # Nuyoah 写真提示词模块
+
+          本目录采用“上游精确镜像 + 本地增强层”结构。
+
+          ## 目录
+
+          - [`upstream/`](upstream/)：南鸢 `nuyoah-xiezhen-prompt` 的只读镜像，锁定提交见 [`UPSTREAM_COMMIT`](UPSTREAM_COMMIT)。
+          - [`aoeking-enhanced/`](aoeking-enhanced/)：面向长期人物写真项目的增强层，增加人物身份 DNA、真实摄影事件和失败诊断。
+
+          ## 使用边界
+
+          上游文件保留原作者、来源和 MIT License。更新上游时应整体替换 `upstream/`，不要在镜像目录中直接维护私有改动。所有定制规则统一放入 `aoeking-enhanced/`，以降低上游升级冲突。
+
+          ## 上游来源
+
+          - 项目：`nuyoah-ai-works/nuyoah-xiezhen-prompt`
+          - 锁定提交：`bc1edb21655e36b89599d31b16f23ad5193d483f`
+          - 上游版本：`0.1.0`
+          - 许可：MIT
+          EOF
+
+          cat > "$ROOT/NOTICE.md" <<'EOF'
+          # Third-party notice
+
+          `upstream/` contains material from `nuyoah-ai-works/nuyoah-xiezhen-prompt`.
+
+          Copyright (c) 2026 南鸢 nuyoah
+
+          Licensed under the MIT License. The original license is preserved at `upstream/LICENSE`.
+
+          The `aoeking-enhanced/` layer is a separate extension maintained in this repository. It does not replace the upstream author's source of truth.
+          EOF
+
+          cat > "$ENHANCED/README.md" <<'EOF'
+          # aoeking 写真导演增强层
+
+          这是建立在南鸢写真提示词方法之上的项目增强层，适合需要长期保持同一位成年人物身份、体态和生活感的连续写真项目。
+
+          核心增加三项能力：
+
+          1. 人物身份 DNA：把不可变化的身份特征与可变化的摄影变量彻底分离。
+          2. 真实摄影事件：先说明这一刻为何发生，再组织动作、衣料、风、水、重心和视线。
+          3. 失败诊断：按身份漂移、体态漂移、摆拍、物理错误、光线错误的优先级修复。
+
+          入口文件：[`SKILL.md`](SKILL.md)
+          EOF
+
+          cat > "$ENHANCED/SKILL.md" <<'EOF'
+          ---
+          name: aoeking-xiezhen-director
+          description: 为已明确为成年人的授权人物生成、改写、诊断和扩展长期连续写真提示词。适用于人物身份 DNA 锁定、真实街头或旅行抓拍、系列母版、独立变体、摄影事件设计与失败成片整改。默认交付提示词和诊断，不主动改变人物身份。
+          license: MIT
+          metadata:
+            author: "aoeking21"
+            version: "1.0.0"
+            derived_from: "nuyoah-ai-works/nuyoah-xiezhen-prompt@bc1edb21655e36b89599d31b16f23ad5193d483f"
+          ---
+
+          # aoeking-xiezhen-director
+
+          ## 目标
+
+          把长期人物写真项目拆成三层：人物真值、摄影事件、成像表达。任何场景、服装、镜头和情绪变化都不得越过人物真值层。
+
+          ## 前置条件
+
+          - 只处理明确为成年人的人物。
+          - 人物参考图必须由用户提供或确认有权使用。
+          - 没有参考图时，不宣称能够锁定具体真人身份。
+          - 不把真实人物替换成明星脸、网红模板脸或标准化审美脸。
+
+          ## 路由
+
+          - 用户要求“完整提示词、直接生图、精确控制”时，输出单张详细提示词。
+          - 用户要求“系列母版、长期项目”时，输出稳定母版和变量槽位。
+          - 用户要求“不同姿势、同系列变体”时，为每张建立独立摄影事件，禁止仅替换动作词。
+          - 用户说“失败、漂移、摆拍、废片、重试”时，先诊断失败层，再给最小整改版。
+          - 用户给图拆解时，先提取可见事实，再区分身份真值、现场事件和成像机制。
+
+          ## 强制执行顺序
+
+          1. 读取人物身份 DNA。
+          2. 确定单一摄影事件。
+          3. 推导身体重心、手部反应、视线和表情。
+          4. 推导衣料、头发、风、水、汗与环境物理。
+          5. 设计构图、机位、焦段、快门和光线。
+          6. 加入必要的负面约束。
+          7. 检查身份、体态、事件和物理是否互相冲突。
+
+          ## 不可变层：人物身份 DNA
+
+          读取并执行 [`references/person-identity-dna.md`](references/person-identity-dna.md)。身份特征的优先级高于服装、场景、姿态、妆容和风格。
+
+          ## 事件层：真实摄影瞬间
+
+          读取并执行 [`references/photographic-event-schema.md`](references/photographic-event-schema.md)。每张图片只保留一个主事件，动作和表情必须是该事件的结果。
+
+          ## 诊断层
+
+          用户反馈成片失败时，读取 [`references/failure-diagnosis.md`](references/failure-diagnosis.md)。一次只修复最上游的主要错误，避免堆叠更多形容词。
+
+          ## 与上游规则的关系
+
+          妆容、道具、构图、成像机制、皮肤纹理与区域反射继续采用 `../upstream/references/prompt-logic.md`。本增强层覆盖以下冲突项：
+
+          - 真实参考人物的年龄、骨架和体态不得被默认年轻化。
+          - 目标系列只能接管可变摄影元素，不能接管人物身份。
+          - 身体轮廓来自参考图或用户明确的体态参数，不自动套用通用模特曲线。
+          - 连续变体必须改变事件因果链，不能复制同一灯位、同一姿态或同一镜头交流。
+
+          ## 输出要求
+
+          - 默认中文。
+          - 最终提示词直接可复制，不展示内部推理。
+          - 明确区分固定项与随机项。
+          - 多张需求输出多条独立提示词或独立事件卡，不承诺一次调用自动连续生成多张。
+          - 光线必须写清来源、方向、人物落点和成像结果。
+          - 皮肤必须同时控制微纹理与区域反射，汗光需要事件依据。
+          EOF
+
+          cat > "$ENHANCED/references/person-identity-dna.md" <<'EOF'
+          # 人物身份 DNA
+
+          ## 第一原则
+
+          上传参考图是具体人物身份的唯一视觉真值。提示词只能改变拍摄条件，不能重塑人物本人。
+
+          ## 不可变身份锚点
+
+          - 脸型轮廓、颧骨、下颌和发际线。
+          - 眼型、眼距、眉眼关系及自然不对称。
+          - 鼻梁、鼻翼、鼻尖和鼻唇关系。
+          - 唇形、嘴角静态关系和真实牙齿特征。
+          - 真实年龄感、肤色、毛孔、细纹、痣和局部肤色差异。
+          - 头颈、肩宽、胸廓、躯干、骨盆和四肢长度比例。
+          - 用户明确要求保留的眼镜、发型识别点、纹身或其他稳定特征。
+
+          ## 可变摄影变量
+
+          服装、妆容、发型状态、动作、表情、场景、天气、道具、构图、机位、焦段、光线和成像媒介可以变化，但必须服从身份锚点。
+
+          ## 体态控制
+
+          - 体态来自参考图或用户明确参数。
+          - 不自动增加胸、腰、臀曲线，不自动收腰、挺胸、拉长腿或改变骨架。
+          - 用户指定清瘦平直体态时，使用窄而连续的胸廓线、较小腰臀差、较小骨盆量感和纤细四肢；保持自然重量与关节结构。
+          - 禁止塑料模特体态、医美化、幼态化、过度年轻化和性征夸张。
+
+          ## 身份校验句
+
+          最终成片应在不依赖服装和场景的情况下，仍能被识别为参考图中的同一位成年人。
+          EOF
+
+          cat > "$ENHANCED/references/photographic-event-schema.md" <<'EOF'
+          # 真实摄影事件 Schema
+
+          ## 核心公式
+
+          环境刺激 → 本能反应 → 重心变化 → 衣料与头发受力 → 短暂表情和视线 → 摄影者偶然按下快门。
+
+          ## 每张事件卡
+
+          1. 事件：这一秒发生了什么。
+          2. 刺激：风、浪、人流、车辆、温度、声音、台阶或道具。
+          3. 本能反应：压衣摆、避浪、收脚、拨发、侧身让路、短暂停步。
+          4. 身体结果：支撑脚、摆动脚、躯干倾向、肩高差、手臂张力。
+          5. 表情结果：疲惫、警觉、迟疑、放松或未完成的笑，必须有现场原因。
+          6. 视线：看向刺激源、前进方向、手中物或远处；镜头交流只能是极短偶然瞬间。
+          7. 物理：衣料厚度、风向、重力、湿水、脚下承重和环境互动一致。
+          8. 摄影结果：构图不完美、允许局部动态模糊，脸部和关键动作保持清晰。
+
+          ## 约束
+
+          - 一张图只设置一个主事件。
+          - 手部动作必须解决现场问题，避免纯展示姿势。
+          - 表情不能独立于事件存在。
+          - 强风、海浪、汗水和衣料贴合必须具备方向与因果。
+          - 禁止叉腰、挺胸、收腹、扭胯、固定回眸和目录式展示服装，除非用户明确要求摆拍。
+          EOF
+
+          cat > "$ENHANCED/references/failure-diagnosis.md" <<'EOF'
+          # 失败成片诊断
+
+          ## 修复优先级
+
+          1. 身份漂移：脸型、五官、年龄、发际线或自然不对称改变。
+          2. 骨架与体态漂移：肩颈、胸廓、腰臀、四肢比例被模特化。
+          3. 事件失效：动作没有现场原因，人物像在配合拍摄。
+          4. 物理错误：风向、水流、衣料、头发、承重或手部关系冲突。
+          5. 表情与视线模板化：持续凝视镜头、商业微笑、刻意忧郁。
+          6. 构图与成像错误：裁切、透视、焦段、快门、光线和皮肤反射失控。
+
+          ## 最小整改法
+
+          - 每轮先锁定一个最高优先级错误。
+          - 删除导致冲突的描述，再加入一条正向可观察约束。
+          - 身份漂移时减少妆容、发型和情绪变量，先恢复脸部真值。
+          - 体态漂移时直接描述胸廓、肩颈、腰臀差和四肢比例，避免只写“纤细”。
+          - 摆拍时重写摄影事件，让手、脚、视线各自承担现实任务。
+          - 油膜皮肤时先降低覆盖脸部的闪光和过曝，再限定 T 区与双颊反射。
+
+          ## 验收
+
+          - 一眼可识别同一人物。
+          - 身体比例与参考或用户参数一致。
+          - 动作可以由现场事件解释。
+          - 视线与表情像未准备好的瞬间。
+          - 风、水、衣料、头发、地面承重方向一致。
+          - 摄影语言具体，没有用空泛形容词替代成像描述。
+          EOF
+
+      - name: Update repository index
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("README.md")
+          text = path.read_text(encoding="utf-8")
+          marker_start = "<!-- nuyoah-xiezhen-prompt:start -->"
+          marker_end = "<!-- nuyoah-xiezhen-prompt:end -->"
+          section = f'''{marker_start}
+
+          ### nuyoah-xiezhen-prompt
+
+          南鸢写真提示词 Skill 的锁定上游镜像，以及面向长期人物项目的 aoeking 增强层。
+
+          - [模块入口](image-generation/nuyoah-xiezhen-prompt/README.md)
+          - [上游原版](image-generation/nuyoah-xiezhen-prompt/upstream/SKILL.md)
+          - [aoeking 增强版](image-generation/nuyoah-xiezhen-prompt/aoeking-enhanced/SKILL.md)
+          - 上游来源：[nuyoah-ai-works/nuyoah-xiezhen-prompt](https://github.com/nuyoah-ai-works/nuyoah-xiezhen-prompt)
+
+          {marker_end}
+          '''
+          if marker_start in text and marker_end in text:
+              before, rest = text.split(marker_start, 1)
+              _, after = rest.split(marker_end, 1)
+              text = before + section + after
+          elif "## 目录结构" in text:
+              text = text.replace("## 目录结构", section + "\n## 目录结构", 1)
+          else:
+              text = text.rstrip() + "\n\n" + section
+
+          old_tree = """ai-skills/
+          ├── image-generation/
+          │   └── female-portrait-director/
+          ├── prompt-engineering/
+          └── docs/"""
+          new_tree = """ai-skills/
+          ├── image-generation/
+          │   ├── female-portrait-director/
+          │   └── nuyoah-xiezhen-prompt/
+          ├── prompt-engineering/
+          └── docs/"""
+          text = text.replace(old_tree, new_tree)
+          path.write_text(text, encoding="utf-8")
+          PY
+
+      - name: Commit imported module
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f .github/workflows/import-nuyoah-xiezhen-prompt.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md image-generation/nuyoah-xiezhen-prompt .github/workflows/import-nuyoah-xiezhen-prompt.yml
+          git commit -m "Import Nuyoah portrait prompt skill with aoeking enhancements"
+          git push origin HEAD:agent/import-nuyoah-xiezhen-prompt
