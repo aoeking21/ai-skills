@@ -25,9 +25,23 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
       - name: Validate canonical skill bundles
         run: python scripts/validate_agent_skills.py .
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Verify skills CLI discovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes skills@1.5.9 add . --list | tee /tmp/skills-list.txt
+          grep -F "aoeking-xiezhen-director" /tmp/skills-list.txt
