@@ -1,7 +1,7 @@
 interface:
   display_name: "Aoeking 写真导演"
-  short_description: "人物 DNA、真实抓拍事件、失败诊断与 GPT Image 2 专用编译"
-  default_prompt: "使用 $aoeking-xiezhen-director 生成或整改授权成年人物的写真提示词；指定 GPT Image 2 时读取专用 Adapter，输出提示词、有效尺寸和可选 API 参数包。"
+  short_description: "人物 DNA、真实摄影事件、GPT Image 2 编译与街头纪实 V1.3"
+  default_prompt: "使用 $aoeking-xiezhen-director 生成或整改授权成年人物的写真提示词；指定 GPT Image 2 时读取专用 Adapter；街头纪实任务同时执行 V1.3 预设，降低服装和美化词占比，提高身份、事件、动作物理与可控不完美。"
 compatibility:
   canonical_format: "agent-skills"
   adapter_targets: ["openai", "codex", "generic", "gpt-image-2"]
