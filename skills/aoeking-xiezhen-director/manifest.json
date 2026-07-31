@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "name": "aoeking-xiezhen-director",
+  "displayName": "Aoeking 写真导演",
+  "version": "1.1.0",
+  "license": "MIT",
+  "source": "https://github.com/aoeking21/ai-skills/tree/main/skills/aoeking-xiezhen-director",
+  "derivedFrom": "nuyoah-ai-works/nuyoah-xiezhen-prompt@bc1edb21655e36b89599d31b16f23ad5193d483f",
+  "installCommand": "npx skills add aoeking21/ai-skills --skill aoeking-xiezhen-director -g -a codex -y",
+  "files": [
+    "SKILL.md",
+    "README.md",
+    "LICENSE",
+    "NOTICE.md",
+    "THIRD_PARTY_LICENSE",
+    "agents/openai.yaml",
+    "agents/interface.yaml",
+    "evals/trigger_cases.json",
+    "evals/quality_cases.json",
+    "references/person-identity-dna.md",
+    "references/photographic-event-schema.md",
+    "references/failure-diagnosis.md",
+    "references/upstream-prompt-logic.md"
+  ]
+}
