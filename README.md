@@ -39,6 +39,22 @@
 
 <!-- callable-agent-skill:end -->
 
+## 应用开发
+
+<!-- wechat-miniprogram-builder:start -->
+
+### wechat-miniprogram-builder（可安装 Agent Skill）
+
+面向微信小程序全生命周期的标准 Agent Skill。支持选题与 MVP、主体与类目、原生开发、云与 AI 安全、审核修复、上线检查、合规增长和产品组合，并对易变化的平台规则执行官方运行时核验。
+
+- [标准 Skill 入口](skills/wechat-miniprogram-builder/SKILL.md)
+- [安装与调用说明](skills/wechat-miniprogram-builder/README.md)
+- Codex 全局安装：`npx skills add aoeking21/ai-skills --skill wechat-miniprogram-builder -g -a codex -y`
+- 临时调用：`npx skills use aoeking21/ai-skills --skill wechat-miniprogram-builder --agent codex`
+- 上游来源：[chenjin-cmd/wechat-miniprogram-builder](https://github.com/chenjin-cmd/wechat-miniprogram-builder)
+
+<!-- wechat-miniprogram-builder:end -->
+
 ## 目录结构
 
 ```text
@@ -47,7 +63,8 @@ ai-skills/
 │   ├── female-portrait-director/
 │   └── nuyoah-xiezhen-prompt/
 ├── skills/
-│   └── aoeking-xiezhen-director/
+│   ├── aoeking-xiezhen-director/
+│   └── wechat-miniprogram-builder/
 ├── prompt-engineering/
 └── docs/
 ```
@@ -57,3 +74,4 @@ ai-skills/
 - `female-portrait-director` 保留原项目作者、许可证、免责声明和版本信息。该模块使用 MIT License。
 - `nuyoah-xiezhen-prompt/upstream` 保留南鸢 nuyoah 的原始版权、来源、版本清单和 MIT License；`aoeking-enhanced` 作为独立增强层维护。
 - `skills/aoeking-xiezhen-director` 是可独立安装的标准包，保留上游 MIT 许可与来源声明。
+- `skills/wechat-miniprogram-builder` 派生自 `chenjin-cmd/wechat-miniprogram-builder`，保留上游 MIT 许可与来源声明。

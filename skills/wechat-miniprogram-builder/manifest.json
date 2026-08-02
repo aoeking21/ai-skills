@@ -1,0 +1,27 @@
+{
+  "name": "wechat-miniprogram-builder",
+  "version": "1.0.0",
+  "format": "agent-skill",
+  "entrypoint": "SKILL.md",
+  "license": "MIT",
+  "derived_from": "https://github.com/chenjin-cmd/wechat-miniprogram-builder",
+  "generated_at": "2026-08-02T01:42:00+08:00",
+  "files": [
+    {"path": "CHANGELOG.md", "sha256": "863118a2cb2fa80cc28efd115d92f665d85206fc3803adb798f23587a1eaa6b4", "bytes": 517},
+    {"path": "LICENSE", "sha256": "c91a787aeab1d049be90dac9fe0c94b60cfd32d2356b80370012630cd0400c8c", "bytes": 1125},
+    {"path": "NOTICE.md", "sha256": "aa1b85d2c9ab77de8082b6cd66bc53b5937a53737551a8673f6fe5681180ce81", "bytes": 621},
+    {"path": "README.md", "sha256": "b2ec26a66a89cc0aa10dbd503a97970945244718789d315e6bf9d8b05e4c9ebb", "bytes": 3261},
+    {"path": "SKILL.md", "sha256": "3fe202f977186f3638395485de9e7242bb4a8ad790a0201413de3161f8a8b295", "bytes": 6748},
+    {"path": "assets/project-brief-template.md", "sha256": "247baae3b8a850c82e18b3e9e0b96ca63ead8b99d79130bdaade18cc3cddbdc8", "bytes": 1026},
+    {"path": "assets/prompt-recipes.md", "sha256": "9c59c199ac246f8ab1656619f0c8addf1ac664d0ef531e93e622aa4308418e99", "bytes": 1530},
+    {"path": "assets/release-checklist.md", "sha256": "40d83a6b752cccea4f62c3c35a3b68175a6062b5700223e9dcb54f6480c1e7fa", "bytes": 1743},
+    {"path": "assets/review-repair-template.md", "sha256": "049f8be6ec366141608c71de48d97cd0fe286edd1d1375eca5f93af8f5bbe6cf", "bytes": 1063},
+    {"path": "references/00-runtime-verification.md", "sha256": "64479dea2db97ac5436e4bb02593946d04f9fe7d78ab0c22a59e53561a1151a9", "bytes": 1796},
+    {"path": "references/01-product-strategy.md", "sha256": "91c0631dac497456b0b433630baa9e352407d53380cf94f6ef856a65675dfe89", "bytes": 1739},
+    {"path": "references/02-account-compliance.md", "sha256": "47bd208adad65d96a69c4c15b308d05db1f9574c45b05cce6247a9c02a24ce2d", "bytes": 1834},
+    {"path": "references/03-build-debug.md", "sha256": "6ab5ace44661599a90b54455281103ec831b0213b5685eeeb00682b03b38f529", "bytes": 1941},
+    {"path": "references/04-cloud-ai-security.md", "sha256": "36fee84007da78bfa564bbe89af8dad4cf1d3c5eb6c1e05c1ba7e0ebc84da8f8", "bytes": 1788},
+    {"path": "references/05-review-release.md", "sha256": "73d30a554b974ffaa36356756890803c035f6c64a921e92cc232ff363b3f63a3", "bytes": 1468},
+    {"path": "references/06-growth-portfolio.md", "sha256": "6129e83a9ed698a4fef98c22f42638181647338d84ef65b2200116d2cc97c5ed", "bytes": 1624}
+  ]
+}
