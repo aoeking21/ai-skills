@@ -23,6 +23,10 @@ Rembrandt External Adapter 只在用户明确要求、任务允许 `relight` 且
 
 Reference Asset Router 将本轮上传图与显式激活的 Profile 引用解析为角色化路由计划：当前上传始终是主身份来源；未显式激活的 Profile 不加载；`model_generated` 不携带身份或特征权威；命中 exact/visual 重复组的引用去重；`preserve-source` 与修复类任务禁用非权威参考。
 
+## Quality Gate / 自动返修
+
+输出交付前逐域校验：身份来源必须声明，受保护域不得变更，变更必须落在 `allowed_changes` 内，`safety_reviewed` 必须为真，`subject_count` 必须与请求一致。失败时按 `quality_gate_feedback` 有界返修（默认最多 2 轮），仍失败返回 `quality_gate_failed`，不静默降级。
+
 ## Manifest 状态
 
 Portrait Master Runtime Manifest 已完成：全局可路由身份资产为 0，私人影集不进入运行记录。

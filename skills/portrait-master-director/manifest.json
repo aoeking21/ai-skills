@@ -13,12 +13,15 @@
     "data/visual-asset-manifest-v1.0.json",
     "data/visual-asset-manifest-v1.0.schema.json",
     "references/asset-governance.md",
+    "references/quality-gate.md",
     "references/reference-asset-router.md",
     "references/reference-profile-contract.md",
     "references/rembrandt-external-adapter.md",
     "references/rollback.md",
     "scripts/portrait_master.py",
+    "scripts/quality_gate.py",
     "scripts/reference_asset_router.py",
+    "tests/test_quality_gate.py",
     "tests/test_reference_asset_router.py",
     "tests/test_portrait_master.py"
   ]
