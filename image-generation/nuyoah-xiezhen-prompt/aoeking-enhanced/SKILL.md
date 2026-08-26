@@ -1,70 +1,55 @@
 ---
-name: aoeking-xiezhen-director
-description: 为已明确为成年人的授权人物生成、改写、诊断和扩展长期连续写真提示词。适用于人物身份 DNA 锁定、真实街头或旅行抓拍、系列母版、独立变体、摄影事件设计与失败成片整改。默认交付提示词和诊断，不主动改变人物身份。
+name: aoeking-xiezhen-legacy-bridge
+description: 早期 aoeking 写真增强层的兼容入口。仅用于历史资料追溯、旧调用迁移与规则对照。新的授权成年真人写真任务统一使用仓库 canonical Skill `skills/aoeking-xiezhen-director`；本兼容层不得与正式 Skill 竞争路由优先级。
 license: MIT
 metadata:
   author: "aoeking21"
-  version: "1.0.0"
+  version: "1.0.1"
+  status: "deprecated"
+  replaced_by: "skills/aoeking-xiezhen-director"
   derived_from: "nuyoah-ai-works/nuyoah-xiezhen-prompt@bc1edb21655e36b89599d31b16f23ad5193d483f"
 ---
 
-# aoeking-xiezhen-director
+# aoeking 写真导演 Legacy Bridge
 
-## 目标
+## 状态
 
-把长期人物写真项目拆成三层：人物真值、摄影事件、成像表达。任何场景、服装、镜头和情绪变化都不得越过人物真值层。
+本目录保留早期增强版，目的只有三个：历史追溯、迁移兼容、与上游规则对照。
 
-## 前置条件
+正式执行入口：[`../../../skills/aoeking-xiezhen-director/SKILL.md`](../../../skills/aoeking-xiezhen-director/SKILL.md)。
 
-- 只处理明确为成年人的人物。
-- 人物参考图必须由用户提供或确认有权使用。
-- 没有参考图时，不宣称能够锁定具体真人身份。
-- 不把真实人物替换成明星脸、网红模板脸或标准化审美脸。
+新的任务、文档、安装命令、Agent 路由和测试不得再把本文件声明为 `aoeking-xiezhen-director`。
 
-## 路由
+## 历史能力摘要
 
-- 用户要求“完整提示词、直接生图、精确控制”时，输出单张详细提示词。
-- 用户要求“系列母版、长期项目”时，输出稳定母版和变量槽位。
-- 用户要求“不同姿势、同系列变体”时，为每张建立独立摄影事件，禁止仅替换动作词。
-- 用户说“失败、漂移、摆拍、废片、重试”时，先诊断失败层，再给最小整改版。
-- 用户给图拆解时，先提取可见事实，再区分身份真值、现场事件和成像机制。
+早期版本已经建立三层结构：
 
-## 强制执行顺序
+1. 人物真值：授权成年人物的身份、真实年龄、身体结构与连续性。
+2. 摄影事件：用真实事件因果推导重心、视线、表情、衣料、风、水与环境接触。
+3. 成像表达：构图、机位、焦段、光线、皮肤纹理和负面约束。
 
-1. 读取人物身份 DNA。
-2. 确定单一摄影事件。
-3. 推导身体重心、手部反应、视线和表情。
-4. 推导衣料、头发、风、水、汗与环境物理。
-5. 设计构图、机位、焦段、快门和光线。
-6. 加入必要的负面约束。
-7. 检查身份、体态、事件和物理是否互相冲突。
+这些原则已经被正式 `aoeking-xiezhen-director` 吸收和继续维护。
 
-## 不可变层：人物身份 DNA
+## 兼容规则
 
-读取并执行 [`references/person-identity-dna.md`](references/person-identity-dna.md)。身份特征的优先级高于服装、场景、姿态、妆容和风格。
+- 历史文档引用本目录时可以继续读取其中 references 进行对照。
+- 发生规则冲突时，以正式 `skills/aoeking-xiezhen-director` 为准。
+- 不在本目录新增 Adapter、Preset、Eval 或新的摄影规则。
+- 不从本目录生成新的安装说明。
+- 不删除本目录，以保证 Git 历史和旧链接可追溯。
 
-## 事件层：真实摄影瞬间
+## 迁移
 
-读取并执行 [`references/photographic-event-schema.md`](references/photographic-event-schema.md)。每张图片只保留一个主事件，动作和表情必须是该事件的结果。
+旧调用：
 
-## 诊断层
+```text
+$aoeking-xiezhen-legacy-bridge
+```
 
-用户反馈成片失败时，读取 [`references/failure-diagnosis.md`](references/failure-diagnosis.md)。一次只修复最上游的主要错误，避免堆叠更多形容词。
+应迁移为：
 
-## 与上游规则的关系
+```text
+$aoeking-xiezhen-director
+```
 
-妆容、道具、构图、成像机制、皮肤纹理与区域反射继续采用 `../upstream/references/prompt-logic.md`。本增强层覆盖以下冲突项：
-
-- 真实参考人物的年龄、骨架和体态不得被默认年轻化。
-- 目标系列只能接管可变摄影元素，不能接管人物身份。
-- 身体轮廓来自参考图或用户明确的体态参数，不自动套用通用模特曲线。
-- 连续变体必须改变事件因果链，不能复制同一灯位、同一姿态或同一镜头交流。
-
-## 输出要求
-
-- 默认中文。
-- 最终提示词直接可复制，不展示内部推理。
-- 明确区分固定项与随机项。
-- 多张需求输出多条独立提示词或独立事件卡，不承诺一次调用自动连续生成多张。
-- 光线必须写清来源、方向、人物落点和成像结果。
-- 皮肤必须同时控制微纹理与区域反射，汗光需要事件依据。
+正式 Skill 已包含 GPT Image 2 Adapter、街头纪实预设、质量评测与失败诊断，后续能力统一在那里升级。
