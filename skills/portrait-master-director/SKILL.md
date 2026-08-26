@@ -18,17 +18,18 @@ metadata:
 - 私人影集：原文件只读保存，默认退出运行索引；不删除、不移动、不改名。
 - 既有治理：不得修改或绕过现有路由、安全、授权、任务模式和回退配置。
 
-涉及资产录入、去重或 Canonical 状态时，读取 [资产治理合同](references/asset-governance.md)。涉及人物专属参考时，读取 [Reference Profile 合同](references/reference-profile-contract.md)。
+涉及资产录入、去重或 Canonical 状态时，读取 [资产治理合同](references/asset-governance.md)。涉及人物专属参考时，读取 [Reference Profile 合同](references/reference-profile-contract.md)。资产如何进入本轮任务由 [Reference Asset Router](references/reference-asset-router.md) 决定。
 
 ## 工作流
 
 1. 判定任务是否要求身份保持，并确认人物为成年人且图像使用已获授权。
 2. 将本轮上传图设为 `current_upload`。若缺少身份图，不得从历史影集静默补图。
 3. 仅当用户显式指定 Profile 时加载该 Profile，并先验证来源、身份权威和人物隔离范围。
-4. 继续沿用现有总优先级：安全与授权、用户本轮明确要求、身份不变量、摄影物理、构图/光影/美颜、默认风格。
-5. 原片修复、4K 修复、保留现场或 `preserve-source` 任务禁止外部重打光适配器改变主光、背景、姿态或构图。
-6. 用户明确要求伦勃朗光且任务允许 `relight` 时，读取 [Rembrandt External Adapter](references/rembrandt-external-adapter.md)，只委托光影域。
-7. 输出应记录身份来源、显式 Profile 选择、任务模式、允许变更域和实际适配器；不得把一次任务结果永久写回人物 Profile。
+4. 用 Reference Asset Router 将当前上传图与 Profile 引用解析为角色化路由计划；被去重或拒绝的引用不得注入任务。
+5. 继续沿用现有总优先级：安全与授权、用户本轮明确要求、身份不变量、摄影物理、构图/光影/美颜、默认风格。
+6. 原片修复、4K 修复、保留现场或 `preserve-source` 任务禁止外部重打光适配器改变主光、背景、姿态或构图。
+7. 用户明确要求伦勃朗光且任务允许 `relight` 时，读取 [Rembrandt External Adapter](references/rembrandt-external-adapter.md)，只委托光影域。
+8. 输出应记录身份来源、显式 Profile 选择、任务模式、允许变更域、路由计划和实际适配器；不得把一次任务结果永久写回人物 Profile。
 
 ## 失败处理
 

@@ -19,6 +19,10 @@ Rembrandt External Adapter 只在用户明确要求、任务允许 `relight` 且
 
 外部仓库许可证尚未确认，因此没有复制其 Skill 正文、图片或提示词资产。
 
+## Reference Asset Router
+
+Reference Asset Router 将本轮上传图与显式激活的 Profile 引用解析为角色化路由计划：当前上传始终是主身份来源；未显式激活的 Profile 不加载；`model_generated` 不携带身份或特征权威；命中 exact/visual 重复组的引用去重；`preserve-source` 与修复类任务禁用非权威参考。
+
 ## Manifest 状态
 
 Portrait Master Runtime Manifest 已完成：全局可路由身份资产为 0，私人影集不进入运行记录。
