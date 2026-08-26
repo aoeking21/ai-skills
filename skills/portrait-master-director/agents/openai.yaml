@@ -1,0 +1,4 @@
+interface:
+  display_name: "Portrait Master Director"
+  short_description: "真正无人物预设的通用人像身份、参考资产与专业光影总控系统"
+  default_prompt: "使用 $portrait-master-director 处理本轮上传的人像；只把用户确认的真实原图作为身份参考，并按任务模式决定是否调用专项光影适配器。"

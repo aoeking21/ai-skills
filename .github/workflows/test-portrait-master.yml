@@ -1,0 +1,47 @@
+name: Test Portrait Master
+
+on:
+  pull_request:
+    paths:
+      - "skills/portrait-master-director/**"
+      - "scripts/validate_agent_skills.py"
+      - ".github/workflows/test-portrait-master.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "skills/portrait-master-director/**"
+      - "scripts/validate_agent_skills.py"
+      - ".github/workflows/test-portrait-master.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate Agent Skill bundles
+        run: python3 scripts/validate_agent_skills.py .
+
+      - name: Validate asset governance
+        run: >-
+          python3 skills/portrait-master-director/scripts/portrait_master.py
+          validate-manifest
+          skills/portrait-master-director/data/visual-asset-manifest-v1.0.json
+
+      - name: Test Portrait Master runtime contracts
+        run: >-
+          python3 -m unittest discover
+          -s skills/portrait-master-director/tests
+          -p 'test_*.py'

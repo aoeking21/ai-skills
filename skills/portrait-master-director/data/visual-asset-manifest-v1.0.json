@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "scope": "portrait_master_runtime_routable_assets",
+  "source": "ChatGPT Library /咪咪的影集",
+  "source_policy": "read_only_no_delete",
+  "completion_status": "complete_runtime_manifest",
+  "archive_audit_status": "summary_only_requires_source_rehydration",
+  "inventory_summary": {
+    "jpeg_jpg_enumerated": 234,
+    "explicitly_model_generated_jpeg": 5,
+    "png_enumeration_completed": true,
+    "png_count_recovered_in_current_workspace": null,
+    "duplicate_size_clusters": 30,
+    "jpeg_files_in_duplicate_size_clusters": 141,
+    "duplicate_candidates_retrieved_for_hashing": 140,
+    "unreadable_hold": ["D04899B9-5AA3-4679-A445-5442BC6C8AB9.jpeg"],
+    "per_asset_hash_table_persisted": false
+  },
+  "runtime_policy": {
+    "global_identity_assets": 0,
+    "current_upload_is_primary": true,
+    "profiles_require_explicit_activation": true,
+    "mimi_general_portraits": "archive_only_not_indexed",
+    "mimi_back_tattoo_reference": "private_profile_only_explicit_activation",
+    "model_generated_identity_authority": "none"
+  },
+  "asset_records": []
+}
