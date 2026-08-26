@@ -67,6 +67,7 @@ class PromptBuilderTests(unittest.TestCase):
             self.assertEqual(package.overlay_id, "bright-heroine")
             self.assertIn("完整全身景别", package.positive_prompt)
             self.assertEqual(package.metadata["composition_mode"], "recompose")
+            self.assertTrue(package.metadata["route_applied"])
 
     def test_restoration_preserves_composition_and_source_light(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -75,7 +76,36 @@ class PromptBuilderTests(unittest.TestCase):
             package = PromptBuilder(skill_root).build(request)
             self.assertEqual(package.metadata["composition_mode"], "preserve")
             self.assertEqual(package.metadata["lighting_mode"], "preserve-source")
+            self.assertFalse(package.metadata["route_applied"])
+            self.assertIsNone(package.metadata["route_file"])
+            self.assertIn("风格 Route：未启用", package.positive_prompt)
             self.assertIn("禁止为了美观重新摆姿", package.positive_prompt)
+
+    def test_reference_beauty_edit_defaults_to_preserve(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_root = make_skill_root(Path(temp_dir))
+            request = GenerationRequest(
+                task="医美级美颜，保持人物本人",
+                identity_reference=Path("reference.jpg"),
+                identity_authorized=True,
+            )
+            package = PromptBuilder(skill_root).build(request)
+            self.assertEqual(package.metadata["composition_mode"], "preserve")
+            self.assertEqual(package.metadata["lighting_mode"], "preserve-source")
+            self.assertEqual(package.metadata["beauty_mode"], "clinical-natural")
+
+    def test_explicit_recompose_and_relight_override_reference_defaults(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            skill_root = make_skill_root(Path(temp_dir))
+            request = GenerationRequest(
+                task="自动构图，伦勃朗重新打光，医美级美颜",
+                identity_reference=Path("reference.jpg"),
+                identity_authorized=True,
+            )
+            package = PromptBuilder(skill_root).build(request)
+            self.assertEqual(package.metadata["composition_mode"], "recompose")
+            self.assertEqual(package.metadata["lighting_mode"], "relight")
+            self.assertEqual(package.metadata["beauty_mode"], "clinical-natural")
 
     def test_clinical_beauty_keeps_identity_structure(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
