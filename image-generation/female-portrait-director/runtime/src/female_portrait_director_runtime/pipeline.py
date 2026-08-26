@@ -37,7 +37,7 @@ class GenerationPipeline:
         manifest.write_text(
             json.dumps(
                 {
-                    "schema_version": "1.0",
+                    "schema_version": "1.1",
                     "created_at": datetime.now(timezone.utc).isoformat(),
                     "skill_root": str(self.skill_root),
                     "request": request.to_dict(),
@@ -58,4 +58,7 @@ class GenerationPipeline:
         result.metadata["identity_review_status"] = postflight.status
         result.metadata["selected_route"] = package.route_id
         result.metadata["selected_overlay"] = package.overlay_id
+        result.metadata["composition_mode"] = package.metadata.get("composition_mode")
+        result.metadata["lighting_mode"] = package.metadata.get("lighting_mode")
+        result.metadata["beauty_mode"] = package.metadata.get("beauty_mode")
         return result
