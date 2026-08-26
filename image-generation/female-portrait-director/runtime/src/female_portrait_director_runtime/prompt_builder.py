@@ -121,6 +121,8 @@ class PromptBuilder:
             return "recompose"
         if self._contains_any(text, self.RESTORATION_TERMS):
             return "preserve"
+        if request.identity_reference:
+            return "preserve"
         return "recompose"
 
     def _resolve_lighting_mode(self, request: GenerationRequest, text: str) -> str:
@@ -130,6 +132,8 @@ class PromptBuilder:
             return "preserve-source"
         if self._contains_any(text, self.RELIGHT_TERMS):
             return "relight"
+        if request.identity_reference:
+            return "preserve-source"
         return "relight"
 
     def _resolve_beauty_mode(self, request: GenerationRequest, text: str) -> str:
@@ -163,11 +167,15 @@ class PromptBuilder:
         )
 
     def build(self, request: GenerationRequest) -> PromptPackage:
+        text = self._request_text(request)
+        is_restoration = self._contains_any(text, self.RESTORATION_TERMS)
         route = self._select_entry(
             request, self.routes, request.route_id, self.ROUTE_ALIASES, "clean-lifestyle"
         )
         if route is None:
             raise RuntimeError("unable to select a route")
+        route_applied = not (is_restoration and request.route_id is None)
+
         overlay = self._select_entry(
             request, self.overlays, request.overlay_id, self.OVERLAY_ALIASES, None
         )
@@ -179,7 +187,6 @@ class PromptBuilder:
         if overlay_file and not overlay_file.is_file():
             raise FileNotFoundError(f"overlay file is missing: {overlay_file}")
 
-        text = self._request_text(request)
         composition_mode = self._resolve_composition_mode(request, text)
         lighting_mode = self._resolve_lighting_mode(request, text)
         beauty_mode = self._resolve_beauty_mode(request, text)
@@ -228,13 +235,21 @@ class PromptBuilder:
             if overlay
             else "不叠加额外气质 Overlay。"
         )
+        route_text = (
+            f"唯一主 Route：{route.name}（{route.item_id}）。{overlay_text}"
+            if route_applied
+            else (
+                "风格 Route：未启用。当前任务属于原片或4K修复，自动回落的 Route 仅作为运行时兼容占位，"
+                "不得施加生活方式、场景、妆造或影调风格化。"
+            )
+        )
 
         positive = "\n\n".join(
             [
-                f"生成一张 {request.aspect_ratio} 的真实摄影质感成年人物图像。任务：{request.task}。"
+                f"输出一张 {request.aspect_ratio} 的真实摄影质感成年人物图像。任务：{request.task}。"
                 f"明确要求：{requirements}。",
                 identity_block,
-                f"唯一主 Route：{route.name}（{route.item_id}）。{overlay_text}",
+                route_text,
                 f"{composition_block} {self._framing_instruction(text)}",
                 lighting_block,
                 self._beauty_instruction(beauty_mode),
@@ -258,7 +273,6 @@ class PromptBuilder:
             "skill/skill.md",
             "skill/core/governance-override-v1.7.md",
             "skill/style-registry.md",
-            route_file.relative_to(self.skill_root).as_posix(),
             "skill/core/reference-image-lock.md" if request.identity_reference else "skill/core/safety-boundary.md",
             "skill/core/director-gate.md",
             "skill/core/parameter-lock.md",
@@ -266,6 +280,8 @@ class PromptBuilder:
             "skill/references/director-expansion.md",
             "skill/references/visual-libraries.md",
         ]
+        if route_applied:
+            rules_loaded.append(route_file.relative_to(self.skill_root).as_posix())
         if overlay_file:
             rules_loaded.extend(
                 [
@@ -289,7 +305,8 @@ class PromptBuilder:
                 "lighting_mode": lighting_mode,
                 "beauty_mode": beauty_mode,
                 "allowed_changes": list(request.allowed_changes),
-                "route_file": route_file.relative_to(self.skill_root).as_posix(),
+                "route_applied": route_applied,
+                "route_file": route_file.relative_to(self.skill_root).as_posix() if route_applied else None,
                 "overlay_file": overlay_file.relative_to(self.skill_root).as_posix() if overlay_file else None,
             },
         )
