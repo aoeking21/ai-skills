@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/aoeking21/ai-skills/portrait-master/visual-asset-manifest-v1.schema.json",
+  "title": "Visual Asset Manifest V1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "scope", "source", "source_policy", "completion_status", "archive_audit_status", "inventory_summary", "runtime_policy", "asset_records"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "scope": {"const": "portrait_master_runtime_routable_assets"},
+    "source": {"type": "string"},
+    "source_policy": {"const": "read_only_no_delete"},
+    "completion_status": {"const": "complete_runtime_manifest"},
+    "archive_audit_status": {"enum": ["complete", "summary_only_requires_source_rehydration"]},
+    "inventory_summary": {"type": "object"},
+    "runtime_policy": {
+      "type": "object",
+      "required": ["global_identity_assets", "current_upload_is_primary", "profiles_require_explicit_activation"],
+      "properties": {
+        "global_identity_assets": {"const": 0},
+        "current_upload_is_primary": {"const": true},
+        "profiles_require_explicit_activation": {"const": true}
+      }
+    },
+    "asset_records": {
+      "description": "Only assets eligible for Portrait Master runtime routing. Private archive-only files are deliberately excluded.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["asset_id", "source_path", "filename", "mime", "size_bytes", "width", "height", "sha256", "perceptual_hash", "exact_duplicate_group", "visual_duplicate_group", "provenance", "identity_authority", "canonical_status", "profile_scope", "runtime_indexed"],
+        "properties": {
+          "asset_id": {"type": "string"},
+          "source_path": {"type": "string"},
+          "filename": {"type": "string"},
+          "mime": {"type": "string"},
+          "size_bytes": {"type": ["integer", "null"]},
+          "width": {"type": ["integer", "null"]},
+          "height": {"type": ["integer", "null"]},
+          "sha256": {"type": ["string", "null"]},
+          "perceptual_hash": {"type": ["string", "null"]},
+          "exact_duplicate_group": {"type": ["string", "null"]},
+          "visual_duplicate_group": {"type": ["string", "null"]},
+          "provenance": {"enum": ["user_confirmed_real_original", "provenance_unknown", "model_generated"]},
+          "identity_authority": {"enum": ["none", "candidate", "verified"]},
+          "canonical_status": {"enum": ["canonical", "redundant_exact", "redundant_visual", "historical_output", "archive_only", "unverified_hold"]},
+          "profile_scope": {"type": ["string", "null"]},
+          "runtime_indexed": {"type": "boolean"},
+          "notes": {"type": ["string", "null"]}
+        }
+      }
+    }
+  }
+}

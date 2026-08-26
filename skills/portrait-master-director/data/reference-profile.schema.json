@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/aoeking21/ai-skills/portrait-master/reference-profile-v1.schema.json",
+  "title": "Reference Profile V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "profile_id", "explicit_activation_required", "references"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "profile_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"},
+    "explicit_activation_required": {"const": true},
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["asset_id", "role", "provenance", "identity_authority"],
+        "properties": {
+          "asset_id": {"type": "string", "minLength": 1},
+          "role": {"enum": ["verified_identity", "verified_feature", "composition", "lighting", "style"]},
+          "provenance": {"enum": ["user_confirmed_real_original", "provenance_unknown", "model_generated"]},
+          "identity_authority": {"enum": ["none", "candidate", "verified"]},
+          "feature": {"type": ["string", "null"]}
+        }
+      }
+    }
+  }
+}

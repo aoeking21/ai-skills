@@ -30,6 +30,14 @@ ALLOWED_DUPLICATE_GROUPS = {
     }
 }
 
+# These files are internal workflow documents named ``SKILL.md`` inside the
+# female-portrait bundle. They are not installable Agent Skill entrypoints and
+# intentionally have no YAML frontmatter.
+NON_AGENT_SKILL_DOCS = {
+    "image-generation/female-portrait-director/skill/SKILL.md",
+    "image-generation/female-portrait-director/skills/female-portrait-director/skill/SKILL.md",
+}
+
 FEMALE_CANONICAL_ROOT = "image-generation/female-portrait-director"
 FEMALE_MIRROR_ROOT = "image-generation/female-portrait-director/skills/female-portrait-director"
 FEMALE_PUBLISHED_PATHS = (
@@ -140,6 +148,9 @@ def validate_repository_skill_names(repo_root: Path) -> list[str]:
     for skill_file in sorted(repo_root.rglob("SKILL.md")):
         if ".git" in skill_file.parts:
             continue
+        relative = skill_file.relative_to(repo_root).as_posix()
+        if relative in NON_AGENT_SKILL_DOCS:
+            continue
         try:
             metadata = parse_frontmatter(skill_file)
         except ValueError as exc:
@@ -149,7 +160,6 @@ def validate_repository_skill_names(repo_root: Path) -> list[str]:
         if not name:
             errors.append(f"{skill_file}: name is required")
             continue
-        relative = skill_file.relative_to(repo_root).as_posix()
         locations[name].add(relative)
 
     for name, paths in sorted(locations.items()):

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "name": "portrait-master-director",
+  "displayName": "Portrait Master Director",
+  "version": "0.1.0",
+  "license": "MIT",
+  "source": "https://github.com/aoeking21/ai-skills/tree/main/skills/portrait-master-director",
+  "modelAdapters": ["rembrandt-external-v1"],
+  "files": [
+    "SKILL.md",
+    "agents/openai.yaml",
+    "data/reference-profile.schema.json",
+    "data/visual-asset-manifest-v1.0.json",
+    "data/visual-asset-manifest-v1.0.schema.json",
+    "references/asset-governance.md",
+    "references/reference-profile-contract.md",
+    "references/rembrandt-external-adapter.md",
+    "references/rollback.md",
+    "scripts/portrait_master.py",
+    "tests/test_portrait_master.py"
+  ]
+}
