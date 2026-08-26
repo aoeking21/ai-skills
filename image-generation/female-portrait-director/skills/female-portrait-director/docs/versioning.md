@@ -3,8 +3,18 @@
 当前公开版本：
 
 ```text
-FEMALE-PORTRAIT-DIRECTOR-V1.6
+FEMALE-PORTRAIT-DIRECTOR-V1.7
 ```
+
+## V1.7 变更摘要
+
+- 新增 `skill/core/governance-override-v1.7.md`，统一任务模式、用户显式修改、参考图身份不变量、摄影物理与 Route/Overlay 的优先级。
+- 将“医美级美颜”统一解释为身份安全的“医美级自然精修”，默认保留具体真人骨相、年龄信息、毛孔、细纹、面痣与区域反射。
+- 将构图拆成 `preserve / recompose`，将光影拆成 `preserve-source / relight`，防止原片修复任务被审美模块擅自重构。
+- 统一单张/多张解析：用户明确数量最高，主任务决定默认 batch count，情绪、动作和 Overlay 不得偷偷扩大数量。
+- 参考图增加 role 思维：identity、body、unique-feature、style、lighting、scene、wardrobe、historical-output。
+- 历史成片及其 Prompt 默认降级为 example/eval/historical-output，不能自动覆盖当前人物真值和用户参数。
+- 更新 `SKILL.md`、首次使用帮助和 Agent 默认提示，并同步发行镜像入口。
 
 ## V1.6 变更摘要
 

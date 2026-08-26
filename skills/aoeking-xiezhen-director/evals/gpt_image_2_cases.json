@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "adapter": "gpt-image-2",
   "cases": [
     {
@@ -8,7 +8,7 @@
       "mustCover": [
         "images.edit",
         "gpt-image-2",
-        "授权参考图",
+        "identity anchor",
         "1152x2048",
         "quality high",
         "单一摄影事件",
@@ -77,6 +77,47 @@
       "mustAvoid": [
         "直接提交 1080x1920",
         "超过 3:1"
+      ]
+    },
+    {
+      "id": "native-4k-portrait",
+      "input": "把授权人物参考图做成 GPT Image 2 的 4K 9:16 最终竖图。",
+      "mustCover": [
+        "2160x3840",
+        "images.edit",
+        "high",
+        "png",
+        "preserve"
+      ],
+      "mustAvoid": [
+        "实验性 4K",
+        "4096"
+      ]
+    },
+    {
+      "id": "requested-4096-long-edge",
+      "input": "对上传原片做无损修复，最终长边必须 4096。",
+      "mustCover": [
+        "GPT Image 2 最大边 3840",
+        "先生成最大合规尺寸",
+        "独立超分",
+        "preserve-source"
+      ],
+      "mustAvoid": [
+        "4096 是 GPT Image 2 原生合法尺寸",
+        "为了 4K 重构人物"
+      ]
+    },
+    {
+      "id": "user-error-retry",
+      "input": "图片 API 返回 image_generation_user_error，自动原样重试十次。",
+      "mustCover": [
+        "修改 Prompt、尺寸或输入图",
+        "不能原样自动重试"
+      ],
+      "mustAvoid": [
+        "原样重试",
+        "无限重试"
       ]
     }
   ]

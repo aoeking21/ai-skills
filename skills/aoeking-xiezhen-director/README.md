@@ -1,8 +1,19 @@
 # aoeking-xiezhen-director
 
-面向授权成年人物长期写真项目的 Agent Skill。重点解决人物身份漂移、身体比例漂移、摆拍感、事件缺失、衣料和环境物理失真，以及多张变体高度重复的问题。
+面向授权成年人物长期写真、参考图编辑、原片修复和连续摄影项目的 Agent Skill。重点解决人物身份漂移、身体比例漂移、摆拍感、事件缺失、构图/光影模式冲突、过度美颜、衣料和环境物理失真，以及多张变体高度重复的问题。
 
-当前版本：`1.3.0`。
+当前版本：`1.4.0`。
+
+## V1.4 核心升级
+
+新增四份强制合同：
+
+- `references/global-priority-contract.md`：统一用户本轮要求、身份不变量、长期 Profile、摄影物理、风格模块优先级。
+- `references/beauty-retouch-contract.md`：将“医美级美颜”规范为身份安全的“医美级自然精修”。
+- `references/composition-lighting-contract.md`：将构图拆成 `preserve / recompose`，光影拆成 `preserve-source / relight`。
+- `references/batch-and-asset-routing-contract.md`：统一单张/多张和视觉参考图角色，防止历史成片污染人物真值。
+
+原则：用户明确修改的可变字段必须生效；身份保留任务中未被用户要求改变的身份结构继续锁定；风格、美颜和灯光不能静默覆盖上游合同。
 
 ## 安装到 Codex
 
@@ -10,7 +21,7 @@
 npx skills add aoeking21/ai-skills --skill aoeking-xiezhen-director -g -a codex -y
 ```
 
-也可以直接从目录安装：
+也可以从目录安装：
 
 ```bash
 npx skills add https://github.com/aoeking21/ai-skills/tree/main/skills/aoeking-xiezhen-director -g -a codex -y
@@ -22,7 +33,7 @@ npx skills add https://github.com/aoeking21/ai-skills/tree/main/skills/aoeking-x
 npx skills add aoeking21/ai-skills --list
 ```
 
-临时调用而不安装：
+临时调用：
 
 ```bash
 npx skills use aoeking21/ai-skills --skill aoeking-xiezhen-director --agent codex
@@ -31,92 +42,130 @@ npx skills use aoeking21/ai-skills --skill aoeking-xiezhen-director --agent code
 ## 基础调用
 
 ```text
-使用 aoeking-xiezhen-director。
-以上传照片中的成年女性为唯一身份参考，生成长沙盛夏强风街头纪实的完整提示词。强调人物 DNA 锁定、真实摄影事件、无摆拍、无持续镜头交流、衣料受力和自然出汗。
+使用 $aoeking-xiezhen-director。
+以上传照片中的授权成年女性为唯一身份参考。
+生成长沙盛夏强风街头纪实。
+自动优化构图，医美级自然精修，真实摄影光影，3:4。
 ```
 
-安装完成后，兼容客户端可根据任务自动激活该 Skill；支持显式 Skill 选择或 @ 提及时，也可直接选中 `aoeking-xiezhen-director`。
+系统会先确定任务模式、参考图角色、身份不变量、允许修改项、摄影事件、构图/光影模式，再编译最终 Prompt。
+
+## 原片修复
+
+```text
+使用 $aoeking-xiezhen-director。
+对上传照片做 4K 原片修复。
+严格保持同一人物、原场景和原主光方向。
+自动优化构图边界和曝光，医美级自然精修，保留毛孔、面痣和真实年龄。
+```
+
+该任务默认：
+
+```text
+mode: restoration
+composition: preserve
+lighting: preserve-source
+beauty: clinical-natural
+```
+
+## 允许重构的写真
+
+```text
+使用 $aoeking-xiezhen-director。
+以上传授权人物为唯一身份来源。
+重新设计 3:4 高级棚拍构图，允许重新打光，使用克制伦勃朗侧光，深炭灰背景。
+```
+
+该任务可以使用：
+
+```text
+composition: recompose
+lighting: relight
+```
+
+具体灯光策略仍服从人物身份、摄影物理和用户锁定项。
 
 ## GPT Image 2 专用 Adapter
 
-Skill 内置 [`adapters/gpt-image-2.md`](adapters/gpt-image-2.md)，用于：
+Skill 内置 [`adapters/gpt-image-2.md`](adapters/gpt-image-2.md)，已于 2026-08-27 依据 OpenAI 官方 GPT Image 2 文档重新校准。
 
-- 把人物写真规则编译成 `gpt-image-2` 专用提示词。
-- 在纯文本生成与授权参考图编辑之间选择正确路由。
-- 输出 Image API 参数包。
-- 把 9:16、3:4 等画幅转换为有效尺寸。
-- 为多张独立成片生成逐次调用计划。
-- 修正 `input_fidelity`、透明背景和无效分辨率等参数错误。
+当前关键接口事实：
 
-### 只输出 GPT Image 2 提示词
+- 模型：`gpt-image-2`，可锁定 `gpt-image-2-2026-04-21`。
+- 新图：`POST /v1/images/generations`。
+- 参考图编辑：`POST /v1/images/edits`。
+- GPT Image 2 的输入图始终高保真处理，编辑请求省略 `input_fidelity`。
+- 当前不支持透明背景，使用 `auto` 或 `opaque`。
+- 输出支持 PNG、JPEG、WebP。
+- 支持大量自定义分辨率，只要满足尺寸约束。
+- 官方列出的常用 4K 尺寸包括 `2160x3840` 和 `3840x2160`。
+
+常用写真映射：
+
+| 比例 | 推荐尺寸 |
+|---|---:|
+| 1:1 | `1024x1024` |
+| 2:3 | `1024x1536` |
+| 3:4 | `1152x1536` |
+| 4:5 | `1280x1600` |
+| 9:16 | `1152x2048` |
+| 16:9 | `2048x1152` |
+| 4K 9:16 | `2160x3840` |
+| 4K 16:9 | `3840x2160` |
+
+如果任务要求长边 `4096`，GPT Image 2 原生最大边当前是 `3840`。正确链路是先生成最大合规尺寸，再进入独立超分辨率后处理，不能直接向 API 提交 4096 边长。
+
+## 多张独立图片
 
 ```text
-使用 aoeking-xiezhen-director 和 GPT Image 2 专用 Adapter。
-以上传照片中的成年女性为唯一身份参考，生成 9:16 长沙强风街头纪实提示词。只输出可复制的最终提示词。
+使用 $aoeking-xiezhen-director 和 GPT Image 2 Adapter。
+基于上传的授权成年人物参考图，生成五张同系列独立街头纪实人像。
+五张使用不同摄影事件、动作阶段、重心、视线和机位。
 ```
 
-### 输出提示词与 API 参数
-
-```text
-使用 aoeking-xiezhen-director 和 GPT Image 2 专用 Adapter。
-基于上传的授权成年人物参考图，生成 9:16 海边动态抓拍。
-输出完整提示词和 OpenAI Image API 参数包。
-```
-
-参考图任务会使用 `edit` 路由并省略 `input_fidelity`。9:16 默认映射为 `1152x2048`，最终写真默认使用 `quality: high`、`output_format: png` 和 `n: 1`。
-
-### 五张独立图片
-
-```text
-使用 aoeking-xiezhen-director 和 GPT Image 2 专用 Adapter。
-生成五张同系列独立人像。每张使用不同摄影事件、动作阶段和构图。
-输出五条完整提示词与五次独立 API 调用计划，严禁五宫格。
-```
+默认每张形成独立 Event Card、完整 Prompt 和独立调用。用户明确要求独立照片时，不压成五宫格或拼图。
 
 ## GPT Image 2 街头纪实 V1.3
 
-Skill 内置 [`presets/gpt-image-2-street-documentary-v1.3.md`](presets/gpt-image-2-street-documentary-v1.3.md)。这是建立在 GPT Image 2 Adapter 之上的街头纪实提示词预设，适合长沙街头、雨后路口、强风、人流避让、电动车气流、跨积水等真实城市事件。
+Skill 内置 [`presets/gpt-image-2-street-documentary-v1.3.md`](presets/gpt-image-2-street-documentary-v1.3.md)。该预设降低服装和空泛美化词权重，提高人物身份、摄影事件、动作物理和真实快门感。
 
-V1.3 的核心变化：
+适合：强风、雨后、街口避让、电动车气流、跨积水、旅行抓拍等具有现场因果的动态人像。
 
-- 降低服装描述权重：服装只保留款式、材质、正常覆盖和事件相关受力，通常控制在一至三句话。
-- 提高人物身份权重：身份与身体结构建议占提示词约 30%，并位于提示词前部。
-- 提高摄影事件权重：每张只使用一个主事件，写清刺激、感知、本能反应和快门时机。
-- 提高动作物理权重：明确支撑脚、摆动脚、重心、肩高差、手部任务和环境接触。
-- 降低美化词：删除“绝美、女神、大师出片、高级感”等不可观察词，改写为镜头、光线、快门和构图结果。
-- 增加可控真实失败概率：每张允许一至两项动作未完成、轻微遮挡、发丝掠脸、方向正确的动态模糊或构图偏移。
+## 视觉参考图角色
 
-可控不完美不包括身份漂移、肢体错误、物理冲突、严重失焦、走光或画面崩坏。
-
-### 推荐调用
+参考图进入工作流前应声明用途：
 
 ```text
-使用 aoeking-xiezhen-director、GPT Image 2 专用 Adapter和 GPT Image 2 街头纪实 V1.3。
-
-以上传照片中的授权成年人为唯一人物身份参考。
-生成长沙雨后街头动态抓拍，9:16，完整全身。
-
-降低服装描述权重，提高人物身份、摄影事件和动作物理权重；删除空泛美化词；每张加入一至两项可控不完美。
-只输出可直接提交 GPT Image 2 的完整提示词。
+identity_anchor
+body_anchor
+unique_feature_anchor
+style_reference
+lighting_reference
+scene_reference
+wardrobe_reference
+historical_output
+failure_case
 ```
 
-### 五张独立街头纪实
+历史成片和其中附带的 Prompt 默认属于 `historical_output`，不会自动升级为人物真值或全局规则。
 
-```text
-使用 aoeking-xiezhen-director、GPT Image 2 专用 Adapter和 GPT Image 2 街头纪实 V1.3。
+## 失败诊断与重试
 
-基于上传的授权成年人物参考图，生成五张同系列独立街头纪实人像。
-五张分别使用不同的现场刺激、动作阶段、支撑脚、视线目标和机位。
-每张加入一至两项不同的可控不完美。
-输出五条完整提示词和五次独立 API 调用计划，每次 n: 1，严禁五宫格。
-```
+失败时优先修最上游问题：
 
-## ChatGPT
+1. 任务模式、数量或参考图角色解析错误。
+2. 人物身份漂移。
+3. 年龄、骨架、身体结构漂移。
+4. 摄影事件失效。
+5. 动作和环境物理错误。
+6. 构图、光影或场景保真错误。
+7. 美颜、皮肤和局部质感问题。
+8. API 参数错误。
 
-ChatGPT 的个人 Skills 可用性取决于套餐和工作区权限。具备 Skills 上传权限时，可将本目录打包为 ZIP，在 ChatGPT 的 Skills 页面选择上传。
+GPT Image 2 返回 `image_generation_user_error` 时，必须先修改 Prompt、尺寸或输入图，不能原样盲目重试。
 
 ## 来源与许可
 
 本 Skill 的增强层由 aoeking21 维护，采用 MIT License。摄影提示词基础方法派生自 `nuyoah-ai-works/nuyoah-xiezhen-prompt`，上游版权和许可证见 `THIRD_PARTY_LICENSE` 与 `NOTICE.md`。
 
-GPT Image 2 Adapter 于 2026-08-01 依据 OpenAI 官方模型页、Image generation 指南和 GPT Image prompting guide 校准。GPT Image 2 街头纪实 V1.3 基于实际多轮街头人像生成结果固化，重点优化人物身份、摄影事件、动作物理和真实快门感。
+外部摄影 Skill 在进入本仓库前必须先确认许可证和复用边界。许可不明确时，可以通过外部依赖或通用摄影知识接口使用其思想，不直接复制其源码、文本和资产。

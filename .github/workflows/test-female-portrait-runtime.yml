@@ -4,12 +4,17 @@ on:
   pull_request:
     paths:
       - "image-generation/female-portrait-director/runtime/**"
+      - "image-generation/female-portrait-director/SKILL.md"
+      - "image-generation/female-portrait-director/skill/core/governance-override-v1.7.md"
       - ".github/workflows/test-female-portrait-runtime.yml"
   push:
     branches:
       - main
+      - repair/photography-assets-v1
     paths:
       - "image-generation/female-portrait-director/runtime/**"
+      - "image-generation/female-portrait-director/SKILL.md"
+      - "image-generation/female-portrait-director/skill/core/governance-override-v1.7.md"
       - ".github/workflows/test-female-portrait-runtime.yml"
   workflow_dispatch:
 
@@ -46,9 +51,11 @@ jobs:
           {
             echo "## female-portrait-director runtime"
             echo ""
-            echo "- prompt builder: tested"
+            echo "- prompt builder governance modes: tested"
             echo "- identity-lock contract validator: tested"
-            echo "- dry-run adapter: tested"
-            echo "- generation manifest pipeline: tested"
+            echo "- exact GPT Image 2 Image API payload: tested"
+            echo "- Responses tool does not claim an underlying image model: tested"
+            echo "- GPT Image 2 size constraints including 4K/4096 edge: tested"
+            echo "- dry-run adapter and manifest pipeline: tested"
             echo "- external image API: intentionally not called in CI"
           } >> "$GITHUB_STEP_SUMMARY"

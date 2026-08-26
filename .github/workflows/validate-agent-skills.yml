@@ -4,13 +4,18 @@ on:
   pull_request:
     paths:
       - "skills/**"
+      - "image-generation/female-portrait-director/**"
+      - "image-generation/nuyoah-xiezhen-prompt/**"
       - "scripts/validate_agent_skills.py"
       - ".github/workflows/validate-agent-skills.yml"
   push:
     branches:
       - main
+      - repair/photography-assets-v1
     paths:
       - "skills/**"
+      - "image-generation/female-portrait-director/**"
+      - "image-generation/nuyoah-xiezhen-prompt/**"
       - "scripts/validate_agent_skills.py"
       - ".github/workflows/validate-agent-skills.yml"
   workflow_dispatch:
@@ -31,7 +36,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Validate canonical skill bundles
+      - name: Validate canonical and mirrored skill bundles
         run: python scripts/validate_agent_skills.py .
 
       - name: Set up Node.js
