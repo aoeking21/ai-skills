@@ -6,7 +6,8 @@ Checks:
 2. manifest.json name/version agree with SKILL.md frontmatter metadata.
 3. Every SKILL.md in the repository participates in a unique-name policy.
 4. Known distribution mirrors may share a name only with their declared canonical source.
-5. Critical mirror entry files remain semantically identical after whitespace normalization.
+5. The full female-portrait distribution mirror has the expected published file inventory.
+6. Critical mirror entry and governance files remain semantically identical.
 """
 
 from __future__ import annotations
@@ -22,14 +23,23 @@ NAME_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
 METADATA_VERSION_RE = re.compile(r"(?m)^\s{2}version:\s*[\"']?([^\"'\s]+)")
 
-# This repository intentionally ships one distribution mirror for the female
-# portrait Skill. Any other duplicate Skill name is an error.
 ALLOWED_DUPLICATE_GROUPS = {
     "female-portrait-director": {
         "image-generation/female-portrait-director/SKILL.md",
         "image-generation/female-portrait-director/skills/female-portrait-director/SKILL.md",
     }
 }
+
+FEMALE_CANONICAL_ROOT = "image-generation/female-portrait-director"
+FEMALE_MIRROR_ROOT = "image-generation/female-portrait-director/skills/female-portrait-director"
+FEMALE_PUBLISHED_PATHS = (
+    "SKILL.md",
+    "agents",
+    "docs/prompt_safety.md",
+    "docs/versioning.md",
+    "examples",
+    "skill",
+)
 
 MIRROR_ENTRY_PAIRS = [
     (
@@ -40,11 +50,39 @@ MIRROR_ENTRY_PAIRS = [
         "image-generation/female-portrait-director/agents/openai.yaml",
         "image-generation/female-portrait-director/skills/female-portrait-director/agents/openai.yaml",
     ),
+    (
+        "image-generation/female-portrait-director/docs/versioning.md",
+        "image-generation/female-portrait-director/skills/female-portrait-director/docs/versioning.md",
+    ),
+    (
+        "image-generation/female-portrait-director/skill/help.md",
+        "image-generation/female-portrait-director/skills/female-portrait-director/skill/help.md",
+    ),
+    (
+        "image-generation/female-portrait-director/skill/core/governance-override-v1.7.md",
+        "image-generation/female-portrait-director/skills/female-portrait-director/skill/core/governance-override-v1.7.md",
+    ),
+    (
+        "image-generation/female-portrait-director/skill/core/reference-image-lock.md",
+        "image-generation/female-portrait-director/skills/female-portrait-director/skill/core/reference-image-lock.md",
+    ),
+    (
+        "image-generation/female-portrait-director/skill/core/safety-boundary.md",
+        "image-generation/female-portrait-director/skills/female-portrait-director/skill/core/safety-boundary.md",
+    ),
+    (
+        "image-generation/female-portrait-director/skill/style-registry.md",
+        "image-generation/female-portrait-director/skills/female-portrait-director/skill/style-registry.md",
+    ),
+    (
+        "image-generation/female-portrait-director/skill/parameter_schema.md",
+        "image-generation/female-portrait-director/skills/female-portrait-director/skill/parameter_schema.md",
+    ),
 ]
 
 
 def frontmatter_text(path: Path) -> str:
-    lines = path.read_text(encoding="utf-8").splitlines()
+    lines = path.read_text(encoding="utf-8-sig").splitlines()
     if not lines or lines[0].strip() != "---":
         raise ValueError(f"{path}: missing YAML frontmatter")
     try:
@@ -73,7 +111,7 @@ def parse_metadata_version(path: Path) -> str | None:
 def validate_links(skill_root: Path) -> list[str]:
     errors: list[str] = []
     for source in skill_root.rglob("*.md"):
-        text = source.read_text(encoding="utf-8")
+        text = source.read_text(encoding="utf-8-sig")
         for raw in LINK_RE.findall(text):
             target = raw.strip().split(maxsplit=1)[0]
             parsed = urlsplit(target)
@@ -91,7 +129,7 @@ def validate_links(skill_root: Path) -> list[str]:
 
 
 def normalize_text(path: Path) -> str:
-    text = path.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n")
+    text = path.read_text(encoding="utf-8-sig").replace("\r\n", "\n").replace("\r", "\n")
     return "\n".join(line.rstrip() for line in text.split("\n")).strip() + "\n"
 
 
@@ -123,6 +161,42 @@ def validate_repository_skill_names(repo_root: Path) -> list[str]:
                 f"duplicate Skill name {name!r}: " + ", ".join(sorted(paths))
             )
 
+    return errors
+
+
+def _published_files(root: Path, published_paths: tuple[str, ...]) -> set[str]:
+    files: set[str] = set()
+    for relative in published_paths:
+        target = root / relative
+        if target.is_file():
+            files.add(target.relative_to(root).as_posix())
+        elif target.is_dir():
+            files.update(
+                path.relative_to(root).as_posix()
+                for path in target.rglob("*")
+                if path.is_file()
+            )
+        else:
+            files.add(f"__MISSING__/{relative}")
+    return files
+
+
+def validate_mirror_inventory(repo_root: Path) -> list[str]:
+    errors: list[str] = []
+    canonical = repo_root / FEMALE_CANONICAL_ROOT
+    mirror = repo_root / FEMALE_MIRROR_ROOT
+    expected = _published_files(canonical, FEMALE_PUBLISHED_PATHS)
+    actual = {
+        path.relative_to(mirror).as_posix()
+        for path in mirror.rglob("*")
+        if path.is_file()
+    }
+    missing = sorted(expected - actual)
+    extra = sorted(actual - expected)
+    if missing:
+        errors.append("female distribution mirror missing files: " + ", ".join(missing))
+    if extra:
+        errors.append("female distribution mirror has unexpected files: " + ", ".join(extra))
     return errors
 
 
@@ -194,6 +268,7 @@ def main() -> int:
         errors.extend(validate_links(root))
 
     errors.extend(validate_repository_skill_names(repo_root))
+    errors.extend(validate_mirror_inventory(repo_root))
     errors.extend(validate_mirror_entrypoints(repo_root))
 
     if errors:
@@ -204,7 +279,7 @@ def main() -> int:
 
     print(
         f"Validated {len(skill_files)} canonical Agent Skill(s); "
-        "repository-wide name, version and mirror governance passed."
+        "repository-wide name, version, inventory and mirror governance passed."
     )
     return 0
 
