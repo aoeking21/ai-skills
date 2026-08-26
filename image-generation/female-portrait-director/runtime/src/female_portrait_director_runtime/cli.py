@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from .adapters import DryRunAdapter, OpenAIResponsesImageAdapter
+from .adapters import DryRunAdapter, OpenAIImageAPIAdapter, OpenAIResponsesImageAdapter
 from .models import GenerationRequest
 from .pipeline import GenerationPipeline
 
@@ -23,7 +23,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     generate.add_argument("--request", type=Path, required=True, help="JSON request file")
     generate.add_argument(
-        "--adapter", choices=("dry-run", "openai"), default="dry-run"
+        "--adapter",
+        choices=("dry-run", "openai", "openai-image-api", "openai-responses"),
+        default="dry-run",
+        help="'openai' is a compatibility alias for the exact-model Image API adapter",
     )
     generate.add_argument("--skill-root", type=Path, default=default_skill_root())
     return parser
@@ -40,11 +43,13 @@ def main() -> int:
     if not request.output_dir.is_absolute():
         request.output_dir = (args.request.parent / request.output_dir).resolve()
 
-    adapter = (
-        DryRunAdapter()
-        if args.adapter == "dry-run"
-        else OpenAIResponsesImageAdapter()
-    )
+    if args.adapter == "dry-run":
+        adapter = DryRunAdapter()
+    elif args.adapter == "openai-responses":
+        adapter = OpenAIResponsesImageAdapter()
+    else:
+        adapter = OpenAIImageAPIAdapter()
+
     result = GenerationPipeline(args.skill_root, adapter).run(request)
     print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2))
     return 0
