@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "name": "aoeking-xiezhen-director",
   "displayName": "Aoeking 写真导演",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "license": "MIT",
   "source": "https://github.com/aoeking21/ai-skills/tree/main/skills/aoeking-xiezhen-director",
   "derivedFrom": "nuyoah-ai-works/nuyoah-xiezhen-prompt@bc1edb21655e36b89599d31b16f23ad5193d483f",
@@ -27,8 +27,12 @@
     "evals/quality_cases.json",
     "evals/gpt_image_2_cases.json",
     "evals/street_documentary_v1_3_cases.json",
+    "references/global-priority-contract.md",
     "references/person-identity-dna.md",
     "references/photographic-event-schema.md",
+    "references/composition-lighting-contract.md",
+    "references/beauty-retouch-contract.md",
+    "references/batch-and-asset-routing-contract.md",
     "references/failure-diagnosis.md",
     "references/upstream-prompt-logic.md"
   ]
